@@ -1,0 +1,75 @@
+import os,xlrd,xlwt
+import datetime
+
+dateT = datetime.datetime.now()
+# 当前日期
+dateTstr = dateT.strftime("%Y%m%d")
+dateTstr01 = dateT.strftime("%Y-%m-%d")
+# 昨天日期
+yesterday = (datetime.date.today() + datetime.timedelta(days = -1)).strftime("%Y-%m-%d")
+# 获取目标文件夹下的子目录
+dir_list = []
+list_test = []
+path = os.listdir('D:\\总数据')
+# 找出所有xlsx的excel文件
+for i in path:
+    if '.xlsx' in i:
+        list_test.append(i)
+print(list_test)
+print("在默认文件夹下有%d个文档哦" % len(list_test))
+# 实现读写数据
+ge = len(list_test)
+matrix = [None] * ge
+# 下面是将所有文件读数据到三维列表cell[][][]中（不包含表头）
+for i in range(ge):
+    fname = list_test[i]
+    bk = xlrd.open_workbook("D:\\总数据\\"+ fname)
+    try:
+        sh = bk.sheet_by_name("Sheet1")
+    except:
+        print("在文件%s中没有找到Sheet1" % fname)
+    # nrows代表行数
+    nrows = sh.nrows
+    print(nrows)
+    matrix[i] = [0] * (nrows - 1)
+    # ncols代表列数
+    ncols = sh.ncols
+    print(ncols)
+    # 储存数据，方便后期编写
+    for m in range(nrows - 1):
+        matrix[i][m] = ["0"] * ncols
+    for j in range(1, nrows):
+        for k in range(0, ncols):
+            matrix[i][j - 1][k] = sh.cell(j, k).value
+
+# 下面这些变量需要您根据自己的具体情况选择
+# 添加表头
+biaotou = ['数据1','数据2']
+
+# 在哪里搜索多个表格
+filelocation = "D:\\总数据\\"
+# 当前文件夹下搜索的文件名后缀
+fileform = "xlsx"
+# 将合并后的表格存放到的位置
+filedestination = "D:\\总数据\\"
+# 合并后的表格命名为file
+file = "汇总表"
+
+# 下面是写数据到新的表格test.xls中哦
+
+filename = xlwt.Workbook()
+# 设置新表的名称
+sheet = filename.add_sheet("汇总")
+# 下面是把表头写上
+for i in range(0, len(biaotou)):
+    sheet.write(0, i, biaotou[i])
+    # 求和前面的文件一共写了多少行
+zh = 1
+for i in range(ge):
+    for j in range(len(matrix[i])):
+        for k in range(len(matrix[i][j])):
+            sheet.write(zh, k, matrix[i][j][k])
+        zh = zh + 1
+
+print("我已经将%d个文件合并成1个文件，并命名为%s.xls" % (ge, file))
+filename.save(filedestination + file + ".xls")
