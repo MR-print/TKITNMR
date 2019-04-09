@@ -1,0 +1,52 @@
+# 读取指定目录的Excel文件
+workfile = xlrd.open_workbook("D:\\总数据\\汇总表.xls")
+table = workfile.sheet_by_name(u'汇总')#通过名称获取
+t1 = table.row_values(0)#获取第一行的值，以列表形式返回
+t2 = table.col_values(0)#获取第一列的值，以列表
+# 形式返回
+print(t2)
+# 获取excel文件的行数与列数
+nrows = table.nrows#行数
+ncols = table.ncols#列数
+workbook = xlsxwriter.Workbook("D:\\总数据\\汇总表.xls")  # 创建一个excel文件
+worksheet = workbook.add_worksheet(u'汇总')  # 在文件中创建一个名为TEST的sheet,不加名字默认为sheet1
+
+'''
+ItemStyle = workbook.add_format({
+        'font_size':10,                #字体大小
+        'bold':1,               #是否粗体
+        'bg_color':'#101010',          #表格背景颜色
+        'font_color':'#FEFEFE',        #字体颜色
+        'align':'center',              #对齐方式，left,center,rigth,top,vcenter,bottom,vjustify
+        'top':2,                       #上边框，后面参数是线条宽度
+        'left':2,                      #左边框
+        'right':2,                     #右边框
+        'bottom':2                     #底边框
+        'text_wrap':1       #自动换行，可在文本中加 '\n'来控制换行的位置
+        'num_format':'yyyy-mm-dd'      #设定格式为日期格式，如：2017-07-01
+})
+'''
+# 设置一个加粗的格式对象,左右居中，上下居中，单元格宽度,字体大小
+bold = workbook.add_format({'bold': False, 'align': 'center', 'valign': 'vcenter', 'border':1, 'font_size':11})
+# 设置一个加粗的格式对象,左右居中，上下居中，单元格宽度,字体大小,背景颜色
+bold_test = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter','border':1, 'font_size':11,'bg_color':'#D9D9D9'})
+# 设置表头样式
+t = table.row_values(0)
+for e,data_t in enumerate(t):
+    # 设置行高
+    worksheet.set_row(0, 20, bold_test)
+    # 写入excel
+    worksheet.write(0, int(e), data_t, bold_test)
+# 设置表头以下的表格样式
+for i in range(1,int(nrows)):
+    t1 = table.row_values(i)  # 获取第i行的值，以列表形式返回
+    print(t1)
+    for j,data in enumerate(t1):# 输出循环次数
+        # 设置行高
+        worksheet.set_row(int(i), 20, bold)
+        # 写excel
+        worksheet.write(int(i) , int(j), data, bold)  # 使用行列的时候第一行起始为i,所以i,j代表着第i+1行的第j+1列
+# 设置列宽(A到B列)
+worksheet.set_column('A:B', 20)
+workbook.close()
+print('————excel设置成功————')
